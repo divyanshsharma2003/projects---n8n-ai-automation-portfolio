@@ -7,13 +7,13 @@ This repository showcases practical automation systems designed to solve real-wo
 
 ## Projects
 
-| Project | Description | Status |
+| Project | Description |
 |---|---|---|
-| **AI HR Recruitment Assistant** | Automates parts of the hiring workflow such as candidate intake, screening, analysis, and recruiter support. | In Progress |
-| **AI Powered Email Assistant** | Helps automate email-related tasks such as drafting, summarization, classification, response support, or routing. | In Progress |
-| **Automate Content Creation** | Streamlines content generation workflows using AI models and external tools for faster publishing or repurposing. | In Progress |
-| **Lead Processing Workflow** | Collects, enriches, filters, and routes lead data automatically for faster follow-up and better organization. | In Progress |
-| **Web App Project** | A web-based project that complements the automation portfolio and demonstrates applied product-building skills. | Planned |
+| **AI HR Recruitment Assistant** | Automates parts of the hiring workflow such as candidate intake, screening, analysis, and recruiter support. | 
+| **AI Powered Email Assistant** | Helps automate email-related tasks such as drafting, summarization, classification, response support, or routing. |
+| **Automate Content Creation** | Streamlines content generation workflows using AI models and external tools for faster publishing or repurposing. |
+| **Lead Processing Workflow** | Collects, enriches, filters, and routes lead data automatically for faster follow-up and better organization. |
+| **Web App Project** | A web-based project that complements the automation portfolio and demonstrates applied product-building skills. |
 
 ## Repository Structure
 
