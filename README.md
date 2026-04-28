@@ -13,6 +13,7 @@ This repository showcases practical automation systems designed to solve real-wo
 | **AI Powered Email Assistant** | Helps automate email-related tasks such as drafting, summarization, classification, response support, or routing. |
 | **Automate Content Creation** | Streamlines content generation workflows using AI models and external tools for faster publishing or repurposing. |
 | **Lead Processing Workflow** | Collects, enriches, filters, and routes lead data automatically for faster follow-up and better organization. |
+| **Job Updates Automation** | AI-driven workflow that monitors job RSS feeds, analyzes relevance using your skills/keywords with Gemini, deduplicates matching roles, logs them to Google Sheets, and sends Telegram alerts for new suitable opportunities. |
 | **ToneShift Model** | An AI powered text transformation web-based project, built using multiple Prompt Engineering Techniques & Gemini API, deployed using Streamlit. |
 
 ## Repository Structure
