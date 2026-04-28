@@ -1,0 +1,598 @@
+{
+  "name": "Job Updates Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Personal Job Search Information",
+        "formDescription": "Get New Job Openings Notification relevant to your current skills and interests",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Your Skills",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -240,
+        -80
+      ],
+      "id": "5ae0908c-0994-4df8-8381-9afffcd3b6bd",
+      "name": "On form submission",
+      "webhookId": "e8040add-2a47-4f5b-9b9e-7d3395da999b",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 3
+            }
+          ]
+        },
+        "feedUrl": "https://jobicy.com/feed/job_feed"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        256
+      ],
+      "id": "efc4ad68-155b-4135-8fd2-974590d8c2f3",
+      "name": "RSS Feed Trigger"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.title }}\n{{ $json.link }}\n{{ $json.pubDate }}\n{{ $json.content }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Job Title",
+              "description": "Job title specified",
+              "required": true
+            },
+            {
+              "name": "Company Name",
+              "description": "Name of the company seeking for the job applicant",
+              "required": true
+            },
+            {
+              "name": "Link",
+              "description": "link to apply (or more information about the specified job)",
+              "required": true
+            },
+            {
+              "name": "Summary",
+              "description": "Detailed summary of the content including about the company (if mentioned in the content), role and responsibilities to be managed as per the job title (what employee will do), focus area of the role",
+              "required": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        -16,
+        256
+      ],
+      "id": "08c520fd-b235-4cce-bca4-f0a6ff5b9f0d",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        432
+      ],
+      "id": "7cf325f6-a3be-4f4d-b688-a9f5a6c211b2",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "9Uabkj0q22AYHWAA",
+          "name": "Google Gemini API Account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get input from previous node\nconst rawInput = $input.first().json.content.parts[0].text;\n\n// Remove markdown code fences if present\nconst cleaned = rawInput\n  .replace(/^```json\\s*/i, '')\n  .replace(/^```\\s*/i, '')\n  .replace(/\\s*```$/, '')\n  .trim();\n\n// Parse JSON\nconst parsed = JSON.parse(cleaned);\n\n// Return structured output\nreturn [\n  {\n    json: {\n      suggestion: parsed.suggestion,\n      score: parsed.job_applicability_score?.score,\n      reason: parsed.job_applicability_score?.reason\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        256
+      ],
+      "id": "440d641c-0ce9-424b-a71a-7a8d1b262a46",
+      "name": "Structured output parser"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are a professional candidate profile reviewer and recruiter, you will be provided with the candidate skills or keywords, according to them, you have to analyze the given job description summary and suggest weather the job is suited for the candidate as per his skills, also score the job applicability based on that in range of 10.\n\nGive the ouput in valid json format only : \n\n{\nsuggestion : Job Align with your skills or Job does not align with your skills\n\njob_applicability_score : {as calculated by you, plus a short reason to support your score}\n}",
+              "role": "model"
+            },
+            {
+              "content": "=You have been given a candidate's skills as : \nSkills/Keywords :  {{ $json[\"Skills/Keywords\"] }}\nyou have to suggest whether the given job is suited for the candidate, by analyzing the job description given, according to the the skills of candidate, also score the applicability in range of 10.\n\nJob description Summary : {{ $('Information Extractor').item.json.output.Summary }}\nGive your output in valid json format only\nJob title : {{ $('Information Extractor').item.json.output[\"Job Title\"] }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        592,
+        256
+      ],
+      "id": "69cf6c38-1205-47d1-b4a0-581868982493",
+      "name": "AI Job Suitability Suggestion",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "XohsRVISGmVMpftf",
+          "name": "Gemini-n8n integration Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1BQ49OEicKzVlfAm91qWyde-audNSywzi8F44DM7wBCY",
+          "mode": "list",
+          "cachedResultName": "Job Updates Details",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BQ49OEicKzVlfAm91qWyde-audNSywzi8F44DM7wBCY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BQ49OEicKzVlfAm91qWyde-audNSywzi8F44DM7wBCY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Job Title": "={{ $json[\"Job Title\"] }}",
+            "Link": "={{ $json.Link }}",
+            "Company Name": "={{ $json[\"Company Name\"] }}",
+            "Summary": "={{ $json.Summary }}",
+            "AI Suggestion": "={{ $json.suggestion }}",
+            "AI_Applicability_score": "={{ $json.score }}",
+            "AI_Reason": "={{ $json.reason }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Skills/Keywords",
+              "displayName": "Skills/Keywords",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Link",
+              "displayName": "Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Summary",
+              "displayName": "Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Suggestion",
+              "displayName": "AI Suggestion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI_Applicability_score",
+              "displayName": "AI_Applicability_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI_Reason",
+              "displayName": "AI_Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2304,
+        240
+      ],
+      "id": "9cf205e8-f7aa-43c2-823b-a00f957d9c60",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wedA9j7ys2NoIiBv",
+          "name": "Google Sheets OAuth API_new"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const key = `${$('Information Extractor').first().json.output[\"Company Name\"]}||${$('Information Extractor').first().json.output[\"Job Title\"]}`\n  .toLowerCase()\n  .trim();\n\n$input.item.json.__key = key;\n\nreturn $input.item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1584,
+        240
+      ],
+      "id": "6f072692-d25d-4537-a3b7-d4352f181e78",
+      "name": "Creating Composite Key (Deduplicaiton)"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1BQ49OEicKzVlfAm91qWyde-audNSywzi8F44DM7wBCY",
+          "mode": "list",
+          "cachedResultName": "Job Updates Details",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BQ49OEicKzVlfAm91qWyde-audNSywzi8F44DM7wBCY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BQ49OEicKzVlfAm91qWyde-audNSywzi8F44DM7wBCY/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1888,
+        240
+      ],
+      "id": "ca74c7cd-708d-42b1-a6e6-b3a6b1a95e2c",
+      "name": "Get Existing Rows",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wedA9j7ys2NoIiBv",
+          "name": "Google Sheets OAuth API_new"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Data from two different previous nodes\nconst metaItem = $(\"Creating Composite Key (Deduplicaiton)\").first().json;\nconst outputItem = $(\"Information Extractor\").first().json;\n\n// Combine both into one clean object\nconst newItem = {\n  ...metaItem,\n  ...(outputItem.output || {})\n};\n\nconst newKey = newItem.__key;\n\n// Existing rows coming into this Code node from Google Sheets\nconst existingRows = $input.all();\n\n// If sheet is empty, allow insert\nif (!existingRows || existingRows.length === 0) {\n  return [{ json: newItem }];\n}\n\n// If only one row exists\nif (existingRows.length === 1) {\n  const row = existingRows[0].json;\n  const comp = row['Company Name'] || '';\n  const role = row['Job Title'] || '';\n  const existingKey = `${comp}||${role}`.toLowerCase().trim();\n\n  if (existingKey === newKey) {\n    return [];\n  }\n\n  return [{ json: newItem }];\n}\n\n// If multiple rows exist\nconst isDuplicate = existingRows.some(item => {\n  const comp = item.json['Company Name'] || '';\n  const role = item.json['Job Title'] || '';\n  const existingKey = `${comp}||${role}`.toLowerCase().trim();\n  return existingKey === newKey;\n});\n\nif (isDuplicate) {\n  return [];\n}\n\nreturn [{ json: newItem }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2096,
+        240
+      ],
+      "id": "c136c941-d959-4c36-a506-48d2e037e22f",
+      "name": "Passing new job if not exists"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fc8e4206-798f-491c-be61-240e1cf06318",
+              "leftValue": "={{ $json.score }}",
+              "rightValue": 6,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1184,
+        256
+      ],
+      "id": "1fed07df-f93c-493a-9ca0-67a0ec4836f6",
+      "name": "If Job suits well",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "chatId": "8036444800",
+        "text": "=Job Title: {{ $json[\"Job Title\"] }}\nCompany: {{ $json[\"Company Name\"] }}\nJob Description: {{ $json.Summary }}\n***************\nSuggestion: {{ $json[\"AI Suggestion\"] }}\nApplicability Score: {{ $json.AI_Applicability_score }}\n***************\nWhy a perfect match?\n{{ $json.AI_Reason }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2512,
+        240
+      ],
+      "id": "a95d483a-ffcb-4d8b-a972-6334511b386e",
+      "name": "New Job Alert for Applicant",
+      "webhookId": "21306411-32b0-4b59-b406-110dcc9e334e",
+      "credentials": {
+        "telegramApi": {
+          "id": "2s7byFVS7bd8Oorv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        400
+      ],
+      "id": "cec899d7-80a8-451c-a281-641952805ac9",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1BQ49OEicKzVlfAm91qWyde-audNSywzi8F44DM7wBCY",
+          "mode": "list",
+          "cachedResultName": "Job Updates Details",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BQ49OEicKzVlfAm91qWyde-audNSywzi8F44DM7wBCY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BQ49OEicKzVlfAm91qWyde-audNSywzi8F44DM7wBCY/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        368,
+        256
+      ],
+      "id": "9586e09c-edb3-49d2-a95b-45bbfe5a2b80",
+      "name": "Fetch Skills/Keywords",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wedA9j7ys2NoIiBv",
+          "name": "Google Sheets OAuth API_new"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        []
+      ]
+    },
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Fetch Skills/Keywords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Job Suitability Suggestion": {
+      "main": [
+        [
+          {
+            "node": "Structured output parser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured output parser": {
+      "main": [
+        [
+          {
+            "node": "If Job suits well",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creating Composite Key (Deduplicaiton)": {
+      "main": [
+        [
+          {
+            "node": "Get Existing Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Existing Rows": {
+      "main": [
+        [
+          {
+            "node": "Passing new job if not exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Passing new job if not exists": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Job suits well": {
+      "main": [
+        [
+          {
+            "node": "Creating Composite Key (Deduplicaiton)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "New Job Alert for Applicant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Skills/Keywords": {
+      "main": [
+        [
+          {
+            "node": "AI Job Suitability Suggestion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "9bfb2b17-33f5-43e2-95e9-2920c98ea146",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d640a168e4eaa794c238a77ced9befad786e55463bce85b9af9afb50d41a9dc7"
+  },
+  "id": "ytverKLsl0A1h1nt",
+  "tags": []
+}
