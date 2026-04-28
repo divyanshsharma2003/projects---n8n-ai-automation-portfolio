@@ -1,0 +1,701 @@
+{
+  "name": "Automate Content Creation",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Automate Blogs, Social Media posts & Youtube Script  Creation\n\n👉Trigger -> On new topic added to google sheet\n\n👉Step 1 -> Generate SEO optimized blog post for the topic for which blog & social media posts are not generated\n\n👉Step 2 -> Generate social media posts for multiple platforms : Facebook, Twitter, Instagram etc.\n\n👉Step 3 -> Generate a Youtube Video Transcript and save in google docs",
+        "height": 320,
+        "width": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        944,
+        -64
+      ],
+      "typeVersion": 1,
+      "id": "215f22fa-d3e8-4d42-8ca9-0207efad9b03",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        576
+      ],
+      "id": "499ee277-82c4-422d-b25a-131a93dc576c",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "18Zg2v3QXl7hQcyDuvkIPE3x9CxOqBLf0PVXHKN5naPA",
+          "mode": "list",
+          "cachedResultName": "AI Content Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18Zg2v3QXl7hQcyDuvkIPE3x9CxOqBLf0PVXHKN5naPA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "content-generation-topics",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18Zg2v3QXl7hQcyDuvkIPE3x9CxOqBLf0PVXHKN5naPA/edit#gid=0"
+        },
+        "event": "rowUpdate",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        368
+      ],
+      "id": "ddd4e39f-220c-4a7f-bc41-d6ffc2d4b572",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "uEhLxMC4JC23jx9w",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "18Zg2v3QXl7hQcyDuvkIPE3x9CxOqBLf0PVXHKN5naPA",
+          "mode": "list",
+          "cachedResultName": "AI Content Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18Zg2v3QXl7hQcyDuvkIPE3x9CxOqBLf0PVXHKN5naPA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "content-generation-topics",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18Zg2v3QXl7hQcyDuvkIPE3x9CxOqBLf0PVXHKN5naPA/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "pending"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -16,
+        464
+      ],
+      "id": "60020f2a-4d65-49f2-a344-179f3a30075b",
+      "name": "Fetch the Topic",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "aLfnHkvVIjskwUUl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "18Zg2v3QXl7hQcyDuvkIPE3x9CxOqBLf0PVXHKN5naPA",
+          "mode": "list",
+          "cachedResultName": "AI Content Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18Zg2v3QXl7hQcyDuvkIPE3x9CxOqBLf0PVXHKN5naPA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1618209309,
+          "mode": "list",
+          "cachedResultName": "AI-Prompts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18Zg2v3QXl7hQcyDuvkIPE3x9CxOqBLf0PVXHKN5naPA/edit#gid=1618209309"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        192,
+        464
+      ],
+      "id": "30909aa7-f77a-476e-b08d-fa49938ab424",
+      "name": "Fetch Dynamic AI Prompts",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "aLfnHkvVIjskwUUl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map((item) => item.json);\nconst topicData = $(\"Fetch the Topic\").all().map((item) => item.json)[0];\nconst updatedItems = items.map((item) => {\n  let systemPrompt = item[\"System Prompt\"];\n  let userPrompt = item[\"User Prompt\"];\n\n  for(const key in topicData){\n    const regex = RegExp(`{{${key}}}`, \"g\");\n    systemPrompt = systemPrompt.replace(regex, topicData[key]);\n    userPrompt = userPrompt.replace(regex, topicData[key]);\n  }\n  item[\"System Prompt\"] = systemPrompt;\n  item[\"User Prompt\"] = userPrompt;\n  return {json : item};\n});\n\nreturn updatedItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        464
+      ],
+      "id": "cb467853-feaa-4cd1-bb74-bd2d2bd13a71",
+      "name": "Replace Topic Details in AI Prompts"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ef605fdf-3260-4bd4-ac3b-62bcbe6c52cd",
+              "leftValue": "={{ $json['Content Platform'] }}",
+              "rightValue": "Wordpress",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        608,
+        464
+      ],
+      "id": "47ece1ef-891f-4068-b144-2e4e928c8910",
+      "name": "If Wordpress"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1408,
+        464
+      ],
+      "id": "576ab431-4e13-4660-9ef7-9573b1016d40",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json[\"System Prompt\"] }}\n\nRespond with valid JSON object only, escape all newlines as \\n in strings.\"",
+              "role": "model"
+            },
+            {
+              "content": "={{ $json[\"User Prompt\"] }}\n{{ $json.content.parts[0].text }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1616,
+        464
+      ],
+      "id": "eab40150-1934-41e9-ab03-6078bbae1d99",
+      "name": "Generate Social Media Posts",
+      "retryOnFail": true,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "9Uabkj0q22AYHWAA",
+          "name": "Google Gemini API Account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json['System Prompt'] }}",
+              "role": "model"
+            },
+            {
+              "content": "={{ $json['User Prompt'] }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1024,
+        336
+      ],
+      "id": "83e657b1-3019-46f5-99e6-85b4026baa9b",
+      "name": "Generate Post Content",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "XohsRVISGmVMpftf",
+          "name": "Gemini-n8n integration Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Merge').item.json[\"Content Platform\"] }}",
+                    "rightValue": "Twitter",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "19ba5d09-2eb2-4d88-a69c-00c8cc2ef4cc"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Twitter"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "328b95ae-1feb-4c44-8a89-23e5968bdd2b",
+                    "leftValue": "={{ $('Merge').item.json[\"Content Platform\"] }}",
+                    "rightValue": "LinkedIn",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "LinkedIn"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "25f33b5e-e70a-4599-a8ff-7565f5866e97",
+                    "leftValue": "={{ $('Merge').item.json[\"Content Platform\"] }}",
+                    "rightValue": "Facebook",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Facebook"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "99f32ded-c2e5-4370-a439-d0ef05cf81f8",
+                    "leftValue": "={{ $('Merge').item.json[\"Content Platform\"] }}",
+                    "rightValue": "YouTube",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "YouTube"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1952,
+        432
+      ],
+      "id": "09153053-c984-4d19-ad8d-b3291a078753",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "person": "MjGBNm9KL5",
+        "text": "={{ $json.linkedin_post }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        2528,
+        448
+      ],
+      "id": "45d40844-6236-4525-9f95-8267683c7217",
+      "name": "Create a post1",
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "oeNmWWzIdhRTjIKc",
+          "name": "LinkedIn account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: `items[0].json.text` containing the code‑block string\n// Output: parsed JSON object (e.g., { linkedin_post: \"...\" })\n\nconst text = $input.first().json.content.parts[0].text;\n\n// Step 1: Remove ```json and backticks, if present\nconst stripped = text\n  .replace(/^```json\\s*/i, '')\n  .replace(/```+$/, '')\n  .trim();\n\n// Step 2: Try to parse JSON safely\nlet parsed;\ntry {\n  parsed = JSON.parse(stripped);\n} catch (err) {\n  throw new Error(`Failed to parse JSON from text: ${err.message}. Input: ${stripped.substring(0, 200)}...`);\n}\n\n// Step 3: Return as a single item in n8n format\nreturn [\n  {\n    json: parsed,\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2288,
+        448
+      ],
+      "id": "fc2ebb83-a0f5-406f-a657-22035ee057ea",
+      "name": "Parse the text"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "18Zg2v3QXl7hQcyDuvkIPE3x9CxOqBLf0PVXHKN5naPA",
+          "mode": "list",
+          "cachedResultName": "AI Content Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18Zg2v3QXl7hQcyDuvkIPE3x9CxOqBLf0PVXHKN5naPA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "content-generation-topics",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18Zg2v3QXl7hQcyDuvkIPE3x9CxOqBLf0PVXHKN5naPA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "topic": "={{ $('Fetch the Topic').item.json.topic }}",
+            "status": "Posted",
+            "audience": "={{ $('Fetch the Topic').item.json.audience }}",
+            "tone": "={{ $('Fetch the Topic').item.json.tone }}",
+            "word_count": "={{ $('Fetch the Topic').item.json.word_count }}",
+            "domain_niche": "={{ $('Fetch the Topic').item.json.domain_niche }}"
+          },
+          "matchingColumns": [
+            "topic"
+          ],
+          "schema": [
+            {
+              "id": "topic",
+              "displayName": "topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "audience",
+              "displayName": "audience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tone",
+              "displayName": "tone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "word_count",
+              "displayName": "word_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "domain_niche",
+              "displayName": "domain_niche",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2736,
+        448
+      ],
+      "id": "dedbc545-ecf1-4531-9347-9926f3573a00",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "aLfnHkvVIjskwUUl",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Fetch the Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch the Topic": {
+      "main": [
+        [
+          {
+            "node": "Fetch Dynamic AI Prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Dynamic AI Prompts": {
+      "main": [
+        [
+          {
+            "node": "Replace Topic Details in AI Prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Topic Details in AI Prompts": {
+      "main": [
+        [
+          {
+            "node": "If Wordpress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Wordpress": {
+      "main": [
+        [
+          {
+            "node": "Generate Post Content",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Generate Social Media Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Post Content": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Social Media Posts": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Parse the text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        []
+      ]
+    },
+    "Create a post1": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse the text": {
+      "main": [
+        [
+          {
+            "node": "Create a post1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch the Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "24dd5a71-933f-4e1d-ac43-db408cb077c6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d640a168e4eaa794c238a77ced9befad786e55463bce85b9af9afb50d41a9dc7"
+  },
+  "id": "YvY8VhITxhl9QYN8",
+  "tags": []
+}
