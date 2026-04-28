@@ -1,0 +1,1 @@
+#ai_hr_recruitment_assistant
