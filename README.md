@@ -1,6 +1,6 @@
 # projects---n8n-ai-automation-portfolio
 # AI Automation Portfolio
-Built by (Divyansh Sharma)[https://www.linkedin.com/in/divyansh-sharma-b4793026b/] — focused on AI automation, workflow design, and practical product integrations.
+Built by [Divyansh Sharma](https://www.linkedin.com/in/divyansh-sharma-b4793026b/) — focused on AI automation, workflow design, and practical product integrations.
 A collection of AI-powered automation projects built using **n8n**, AI tools, APIs, and workflow integrations.
 
 This repository showcases practical automation systems designed to solve real-world business and productivity problems, including recruitment support, email assistance, content generation, lead processing, and web-based applications.
