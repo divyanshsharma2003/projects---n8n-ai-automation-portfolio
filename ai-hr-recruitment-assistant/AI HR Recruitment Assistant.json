@@ -1,0 +1,1435 @@
+{
+  "name": "AI HR Recruitment Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## AI Recruitment Assistant\n**Trigger** -> New resume received via Webform or Email (gmail node)\n\n**Evaluate Resume** -> HR person goes through the resume and evaluates profile fitment.\n\n**Make Decision** -> HR person routes the profile based on the scoring and shortlisting of the profile \n\nScore > 7 -> Shortlist\n5-7 -> Add to \"maybe\" list\n< 5 -> Archive\n\n**Log and Track** -> HR person uploads the CV to cloud storage , makes an entry in the Job applicants tracker.\n\n**Notify** -> If shortlisted , HR person notifies the Hiring Manager and sends email to the candidate for short connet over phone.",
+        "height": 400,
+        "width": 624,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        672,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "6e835686-ed26-4099-a3ae-d31d5915ad64",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "formTitle": "Job Application",
+        "formDescription": "Full Stack Developer",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "First Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Last Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Resume/CV",
+              "fieldType": "file",
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            },
+            {
+              "fieldType": "hiddenField",
+              "fieldName": "hdn-job-code",
+              "fieldValue": "jobcode-001"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "Your application has been recieved"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -432,
+        400
+      ],
+      "id": "3f94f49b-4dc2-42d3-be1a-28ba9d2d794d",
+      "name": "Job Application - Full Stack Dev",
+      "webhookId": "e98097cd-5a2d-4be7-8c64-fbfd12313381"
+    },
+    {
+      "parameters": {
+        "formTitle": "Job Application",
+        "formDescription": "IT Support Specialist",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "First Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Last Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Resume/CV",
+              "fieldType": "file",
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            },
+            {
+              "fieldType": "hiddenField",
+              "fieldName": "hdn-job-code",
+              "fieldValue": "jobcode-003"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "Your application has been recieved"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -432,
+        880
+      ],
+      "id": "8393f55b-2915-4c6c-b941-68b1b9656f58",
+      "name": "Job Application - IT Support Specialist",
+      "webhookId": "4bab274c-a944-4596-b20e-bd455a9c87a0"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "Resume_CV",
+        "name": "={{ $json[\"hdn-job-code\"] }}- {{ $json[\"First Name\"] }}-{{ $json[\"Last Name\"] }}[{{$now.format('DD T')}}]",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1UCPcDHYh235bOu5oMVPgK23nluKDEN9g",
+          "mode": "list",
+          "cachedResultName": "Resumes",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1UCPcDHYh235bOu5oMVPgK23nluKDEN9g"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -96,
+        512
+      ],
+      "id": "abfcf8e8-d80a-4b37-9f06-7756a5237f99",
+      "name": "Upload Resumes",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GLFVFo0UcH1GphOt",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        256,
+        784
+      ],
+      "id": "9707b6d5-5313-4447-8bfc-5cb5acd72abb",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "XohsRVISGmVMpftf",
+          "name": "Gemini-n8n integration Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"properties\" : {\n    \"city\" : {\n      \"type\" : \"string\",\n      \"description\" : \"The city of the contact\"\n    },\n    \"telephone\" : {\n      \"type\" : \"string\",\n      \"description\" : \"The Phone number of the contact\"\n    },\n    \"email\" : {\n      \"type\" : \"string\",\n      \"format\" : \"email\",\n      \"description\" : \"The email of the contact\"\n    },\n    \"full_name\" : {\n      \"type\" : \"string\",\n      \"description\" : \"Full name of the contact\"\n    },\n    \"linkedin_profile\" : {\n      \"type\" : \"string\",\n      \"format\" :\"url\",\n      \"description\" : \"Linked In profile (url) of the contact\"\n    }\n  },\n  \"required\" : [\n    \"full_name\",\n    \"email\",\n    \"city\",\n    \"linkedin_profile\",\n    \"telephone\"\n  ]\n}",
+        "options": {
+          "systemPromptTemplate": "You are an expert extraction algorithm.\nOnly extract relevant personal information from the text.\nIf you do not know the value of an attribute asked to extract, you may set the value for that attribute to NA."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        256,
+        576
+      ],
+      "id": "fc48e4cb-b92b-45be-b960-b13d940c3e2f",
+      "name": "Extract Personal Information"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "Resume_CV",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        112,
+        768
+      ],
+      "id": "f64fa8eb-7c1d-4262-bca0-526cc17eee89",
+      "name": "Extract info from Resume"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Educational Qualification",
+              "description": "Summary of academic career, focusing on undergraduate and academic studies. Summarize in 100 words maximum",
+              "required": true
+            },
+            {
+              "name": "Job History",
+              "description": "Summary of job history, focusing on the most recent work experiences, in maximum 100 words.",
+              "required": true
+            },
+            {
+              "name": "Skill",
+              "description": "Extract candidates technical skills, what frameworks, software and functional skills they are proficient in. Make a bulleted list.",
+              "required": true
+            },
+            {
+              "name": "Experience",
+              "description": "Extract experiences, mention experiences according the job function or role type. Format - Total Experience: 7 years - Account Executive: 2 years - Sales Development Representative: 2 years - Account Manager: 3 years",
+              "required": true
+            },
+            {
+              "name": "Title and Employer",
+              "description": "Extract most recent job title and employer"
+            },
+            {
+              "name": "Total Years Experience",
+              "description": "Extract total years experience and format it as Total Years Exp : "
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        256,
+        976
+      ],
+      "id": "a4a94821-4467-47f9-a59c-f9f0941f53be",
+      "name": "Extract Professional Information"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        608,
+        768
+      ],
+      "id": "b5e6528f-2638-43e7-9f02-12c25f9be5d7",
+      "name": "Unified Profile Data"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        832,
+        944
+      ],
+      "id": "6667fd03-cb46-442b-9703-8f9ec0d36e11",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MKUhbbRZETPSTr0M",
+          "name": "Google Gemini API Account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "summarizationMethodAndPrompts": {
+            "values": {
+              "combineMapPrompt": "=You have been given the information of a job applicant , you have to summarize based on it. Make sure to be professional, concise and conversational while summarizing. Use about 400 words or less.\n\nHere is the information of the applicant : \nname: {{ $json.output.name }}\nlocation: {{ $json.output.location }}\neducational qualification: {{ $json.output[\"Educational Qualification\"] }}\njob history: {{ $json.output[\"Job History\"] }}\nskills: {{ $json.output.Skill }}\nexperience: {{ $json.output.Experience }}\ntotal years experience: {{ $json.output[\"Total Years Ecperience\"] }}\napplied date: {{$now.format('DD')}}",
+              "prompt": "=You have been given the information of a job applicant , you have to summarize based on it. Make sure to be professional, concise and conversational while summarizing. Use about 400 words or less.\n\nHere is the information of the applicant : \nname: {{ $json.output.name }}\nlocation: {{ $json.output.location }}\neducational qualification: {{ $json.output[\"Educational Qualification\"] }}\njob history: {{ $json.output[\"Job History\"] }}\nskills: {{ $json.output.Skill }}\nexperience: {{ $json.output.Experience }}\ntotal years experience: {{ $json.output[\"Total Years Ecperience\"] }}\napplied date: {{$now.format('DD')}}"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainSummarization",
+      "typeVersion": 2.1,
+      "position": [
+        832,
+        768
+      ],
+      "id": "c242d312-cf85-4baa-904b-6ade84e7ff90",
+      "name": "Profile Summarization"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Merge').item.json['hdn-job-code'] }}",
+                    "rightValue": "=jobcode-001",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "8ac01d48-a059-4248-b292-f4a8826292c7"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Full Stack Developer"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "93e78c92-bc3f-4d66-9e6a-b4f38c8d83bf",
+                    "leftValue": "={{ $('Merge').item.json['hdn-job-code'] }}",
+                    "rightValue": "jobcode-002",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Apllication Assistant"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "6df11068-1d2f-4e59-92cb-04e3147acee3",
+                    "leftValue": "={{ $('Merge').item.json['hdn-job-code'] }}",
+                    "rightValue": "jobcode-003",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "IT Support Specialist"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1184,
+        752
+      ],
+      "id": "056b0240-f7bf-4dbd-9ade-60adc809bcbd",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "1S2Xj6CXJHkiYrGszYEK00EGrR3n6CiSqtjxsyuBB-Q4"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        576
+      ],
+      "id": "594f6214-84ac-4e6a-9854-765728d272d0",
+      "name": "Get Full Stack JD",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "BozoIV5RFrGj3s31",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "122mw3tchbK_O7kFpXTMhD_Rn4NVFBDoDXA_ni3xW3f8"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        768
+      ],
+      "id": "2b58c3c6-3a38-47b5-bb0f-bb04daf862a1",
+      "name": "Get Account Assistant JD",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "BozoIV5RFrGj3s31",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "1e6XsflBGQtfSy9k8TEM4EU0EtdMkBaCiAmDWsDedkEc"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        960
+      ],
+      "id": "889171be-f35d-4111-a524-2a54c75ada8e",
+      "name": "Get IT Support Specialist JD",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "BozoIV5RFrGj3s31",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1856,
+        992
+      ],
+      "id": "68ebce83-202a-4a77-aae9-8c8f2fa706b8",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "9Uabkj0q22AYHWAA",
+          "name": "Google Gemini API Account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Job posting details :\n{{ $json.content }}\n\nHere is the Candidate Profile Summary :\n{{ $('Profile Summarization').item.json.output.text }}\n\nYou MUST respond ONLY with valid JSON, with no extra keys, comments, code blocks, or explanations.\nDo not wrap the JSON in ``` or any other formatting.",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an HR expert and you need to understand if the candidate aligns with the job profile that company has sought. You have to score the candidate alignment with the job profile in the range of 1 to 10, where 1 means, candidate does not align with what is required, while 10 means that they are the ideal candidate for the job and they fully reflect the job profile. Also , in the 'consideration' field briefly and concisely explain your reasoning behind the score given.\n\nYou MUST respond ONLY with valid JSON that matches this schema, with no extra keys, comments, code blocks, or explanations.\nDo not wrap the JSON in ``` or any other formatting, wrap it as per the given format of json:\n\n{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"ai_resume_score\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n\t\t\"ai_evaluation\": {\n\t\t\t\"type\": \"string\"\n\t\t}\n\t}\n}"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1856,
+        816
+      ],
+      "id": "7a114b8f-dd22-4127-9f01-4ed4127147b9",
+      "name": "Evaluate and Score Candidate Profile"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9e7080e3-2179-4d81-98fc-0bc415a4ea1e",
+              "name": "output",
+              "value": "={{ JSON.parse($json.text) }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2208,
+        816
+      ],
+      "id": "b9296972-8134-4714-8b63-90568cb37722",
+      "name": "Parsing Output"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.ai_resume_score }}",
+                    "rightValue": 7,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    },
+                    "id": "f5afec2a-b17e-4c6c-a764-5818ad3ce5b9"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Shortlisted"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "af6ee5f5-b88b-4ad6-b291-43cbe7b9c159",
+                    "leftValue": "={{ $json.output.ai_resume_score }}",
+                    "rightValue": 5,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Maybe"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Ignored"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        2432,
+        800
+      ],
+      "id": "030ff92e-85f7-4cb1-826f-95450d3d3175",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "37657e93-b6a3-465b-b986-45210086cd4a",
+              "name": "ai_status",
+              "value": "Shortlisted",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2656,
+        576
+      ],
+      "id": "27eb4d1b-39f8-403f-9cc2-73853b2db847",
+      "name": "Shortlisted"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "37657e93-b6a3-465b-b986-45210086cd4a",
+              "name": "ai_status",
+              "value": "Maybe",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2656,
+        768
+      ],
+      "id": "41cde469-e257-4a1a-8b05-b8bcd4dea9d9",
+      "name": "Maybe"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "37657e93-b6a3-465b-b986-45210086cd4a",
+              "name": "ai_status",
+              "value": "Ignored",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2656,
+        960
+      ],
+      "id": "00e57fec-cf57-490c-95e4-164e0ae364dc",
+      "name": "Ignored"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f9af36ea-d167-4841-a9da-3e5ed6dbe655",
+              "name": "profile",
+              "value": "Full Stack Developer",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1632,
+        576
+      ],
+      "id": "42236210-5bbf-42eb-ac56-dc968993ef36",
+      "name": "Set Profile as full Stack"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "25c90b72-1e91-4842-be64-119b1344545b",
+              "name": "profile",
+              "value": "Account Assistant",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1632,
+        768
+      ],
+      "id": "510fe92b-424d-4f26-a69b-8047da5e7b4a",
+      "name": "Set profile as Account Assistant"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f8eabec3-b825-41e2-a2f2-444b147214c0",
+              "name": "profile",
+              "value": "IT Support Specialist",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1632,
+        960
+      ],
+      "id": "adad9238-c526-4405-825d-371d14e835da",
+      "name": "Set profile as IT Support Specialist"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -96,
+        752
+      ],
+      "id": "7cfeca12-8c14-4a5a-8fd3-865154d552e0",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "sendTo": "=divyansh.cohortgu@gmail.com",
+        "subject": "Congrats! Your profile has been shortlisted.",
+        "message": "=Hello {{ $('Unified Profile Data').item.json.output.name }},\n\nYour profile has been shortlisted for our Full Stack Developer Profile.\nPlease share some slots next week so that we can have a short 15 minutes connect.\n\nRegards,\nHR Team",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Divyansh Sharma"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2880,
+        480
+      ],
+      "id": "6439a1bc-ee9d-489f-b3fa-f51a855055a5",
+      "name": "Shortlisted Mail",
+      "webhookId": "e5382838-c0a0-4de0-ae6f-d9e8425d72c9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WUpVZaL8eueGA5JC",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "divyansh.cohortgu@gmail.com",
+        "subject": "Update regarding your profile shortlisting.",
+        "message": "=Hello  {{ $('Unified Profile Data').item.json.output.name }},\n\nWe have gone through your profile and kept you on hold, we will update you further shortly.\n\nRegards,\nHR Team",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Divyansh Sharma"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2880,
+        656
+      ],
+      "id": "de9e7c00-bc67-4a83-8ba8-339a7f3020e6",
+      "name": "On Hold Mail",
+      "webhookId": "cc5b86a9-f8a3-406f-ac1f-bf8c5b137fd8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WUpVZaL8eueGA5JC",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "divyansh.cohortgu@gmail.com",
+        "subject": "Better Luck Next Time!",
+        "message": "=Hello  {{ $('Unified Profile Data').item.json.output.name }},\n\nWe have gone through your profile and this time you are not the one we need, so, we can't take your candidature ahead, we hope to see you soon next time.\n\nRegards,\nHR Team",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Divyansh Sharma"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2880,
+        1024
+      ],
+      "id": "52801cdd-6637-4a8d-a2f3-4a86bf7ab14e",
+      "name": "Rejected Mail",
+      "webhookId": "cc5b86a9-f8a3-406f-ac1f-bf8c5b137fd8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WUpVZaL8eueGA5JC",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Job Application",
+        "formDescription": "Account Assistant",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "First Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Last Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Resume/CV",
+              "fieldType": "file",
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            },
+            {
+              "fieldType": "hiddenField",
+              "fieldName": "hdn-job-code",
+              "fieldValue": "jobcode-002"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "Your application has been recieved"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -432,
+        640
+      ],
+      "id": "9b040582-34b8-4bce-8e5a-6fc55b260581",
+      "name": "Job Application - Account Assistant",
+      "webhookId": "68750d5c-a6c3-42d6-b9f9-c41c13f9e506"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1OAVPM_Z5evXDhfJKU-yQ54voVIHNKIKq8fqnIlLG-TE",
+          "mode": "list",
+          "cachedResultName": "Job Applicants Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1OAVPM_Z5evXDhfJKU-yQ54voVIHNKIKq8fqnIlLG-TE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1OAVPM_Z5evXDhfJKU-yQ54voVIHNKIKq8fqnIlLG-TE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Job Code": "={{ $('Merge').item.json['hdn-job-code'] }}",
+            "Hiring Manager": "Divyansh Sharma",
+            "Hiring Manager Email": "divyansh.cohortgu@gmail.com",
+            "Applicant Name": "={{ $('Unified Profile Data').item.json.output.name }}",
+            "Application Date": "={{ $('Merge').item.json.submittedAt.toDateTime().format('DD') }}",
+            "Final Score": "={{ $json.output.ai_resume_score }}",
+            "AI Status": "={{ $json.ai_status }}",
+            "AI Assessment": "={{ $json.output.ai_evaluation }}",
+            "Total Experience": "={{ $('Unified Profile Data').item.json.output['Total Years Experience'] }}",
+            "Experience Summary": "={{ $('Unified Profile Data').item.json.output.Experience }}",
+            "Job History": "={{ $('Unified Profile Data').item.json.output[\"Job History\"] }}",
+            "Skills": "={{ $('Unified Profile Data').item.json.output.Skill }}",
+            "Applicant location": "={{ $('Unified Profile Data').item.json.output.location }}",
+            "Applicant Phone": "='{{ $('Unified Profile Data').item.json.output.phone }}",
+            "Applicant Education": "={{ $('Unified Profile Data').item.json.output[\"Educational Qualification\"] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Job Code",
+              "displayName": "Job Code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hiring Manager",
+              "displayName": "Hiring Manager",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hiring Manager Email",
+              "displayName": "Hiring Manager Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Applicant Name",
+              "displayName": "Applicant Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Application Date",
+              "displayName": "Application Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Final Score",
+              "displayName": "Final Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Status",
+              "displayName": "AI Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Assessment",
+              "displayName": "AI Assessment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total Experience",
+              "displayName": "Total Experience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Experience Summary",
+              "displayName": "Experience Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job History",
+              "displayName": "Job History",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Skills",
+              "displayName": "Skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Applicant location",
+              "displayName": "Applicant location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Applicant Phone",
+              "displayName": "Applicant Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Applicant Education",
+              "displayName": "Applicant Education",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2880,
+        816
+      ],
+      "id": "8141b194-0a3d-4392-bc60-f6c108b7b61a",
+      "name": "Logging Applicant Details",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wedA9j7ys2NoIiBv",
+          "name": "Google Sheets OAuth API_new"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Job Application - Full Stack Dev": {
+      "main": [
+        [
+          {
+            "node": "Upload Resumes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job Application - IT Support Specialist": {
+      "main": [
+        [
+          {
+            "node": "Upload Resumes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extract Personal Information",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Extract Professional Information",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract info from Resume": {
+      "main": [
+        [
+          {
+            "node": "Extract Personal Information",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract Professional Information",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Personal Information": {
+      "main": [
+        [
+          {
+            "node": "Unified Profile Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Professional Information": {
+      "main": [
+        [
+          {
+            "node": "Unified Profile Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Unified Profile Data": {
+      "main": [
+        [
+          {
+            "node": "Profile Summarization",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Profile Summarization",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Profile Summarization": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Get Full Stack JD",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Account Assistant JD",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get IT Support Specialist JD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Full Stack JD": {
+      "main": [
+        [
+          {
+            "node": "Set Profile as full Stack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Account Assistant JD": {
+      "main": [
+        [
+          {
+            "node": "Set profile as Account Assistant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get IT Support Specialist JD": {
+      "main": [
+        [
+          {
+            "node": "Set profile as IT Support Specialist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Evaluate and Score Candidate Profile",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate and Score Candidate Profile": {
+      "main": [
+        [
+          {
+            "node": "Parsing Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsing Output": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Shortlisted",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Maybe",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ignored",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shortlisted": {
+      "main": [
+        [
+          {
+            "node": "Logging Applicant Details",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Shortlisted Mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Maybe": {
+      "main": [
+        [
+          {
+            "node": "Logging Applicant Details",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "On Hold Mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ignored": {
+      "main": [
+        [
+          {
+            "node": "Logging Applicant Details",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Rejected Mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Profile as full Stack": {
+      "main": [
+        [
+          {
+            "node": "Evaluate and Score Candidate Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set profile as Account Assistant": {
+      "main": [
+        [
+          {
+            "node": "Evaluate and Score Candidate Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set profile as IT Support Specialist": {
+      "main": [
+        [
+          {
+            "node": "Evaluate and Score Candidate Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Extract info from Resume",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job Application - Account Assistant": {
+      "main": [
+        [
+          {
+            "node": "Upload Resumes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "timezone": "Asia/Kolkata",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "640bdf97-5eb0-403a-9a9c-7f7c8e2d6216",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d640a168e4eaa794c238a77ced9befad786e55463bce85b9af9afb50d41a9dc7"
+  },
+  "id": "tvpDYeVYMo7otygG",
+  "tags": []
+}
